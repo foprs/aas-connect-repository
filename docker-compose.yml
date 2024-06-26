@@ -1,0 +1,92 @@
+﻿### AAS Connect Docker Compose Configuration ###
+### ---------------------------------------- ###
+### Copyright (c) 2024. FoP Consult GmbH     ###
+### All rights reserved.                     ###
+
+services:
+  ### AAS-Connect instance ###
+  aas-connect:
+    image: ris088/aas-connect
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    container_name: aas-connect
+    volumes:
+      - ./cms:/cms
+    ports:
+      - "4000:4102"
+    restart: unless-stopped
+    environment:
+      - DH_DB_URL=bolt://aas-neo4j:7687
+      - DH_DB_DATABASE=neo4j
+      - DH_DB_USER=neo4j
+      - DH_DB_PASSWORD=aas-connect
+      - DEFAULT_USERNAME=aas
+      - DEFAULT_PASSWORD=connect
+      - NODE_ENV=
+
+  ### -- Dependent Services -- ###
+
+  ### GraphQL Frontend Instances ###
+  cms:
+    image: ris088/gql-frontend:latest
+    container_name: aas-cms
+    volumes:
+      - ./cms:/output
+    environment:
+      - VITE_DEFAULT_TOKEN_PATH=token/
+      - VITE_LICENSE_KEY=${GQLF_LICENSE_KEY}
+
+
+  ### Neo4j Database Instance ###
+  neo4j:
+    image: neo4j:5.7.0-community
+    hostname: aas-neo4j
+    container_name: aas-neo4j
+    restart: unless-stopped
+    volumes:
+      - ./neo4j/uploads:/uploads/
+      - ./neo4j/backup:/backup/
+      - ./neo4j/plugins:/plugins
+      - ./neo4j/data:/data
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/ssl:/ssl
+      - ./neo4j/conf:/conf
+      - ./neo4j/logs:/logs
+      - ./neo4j/cypher:/cypher
+    healthcheck:
+      test: wget http://localhost:7474 || exit 1
+      interval: 3s
+      timeout: 120s
+      retries: 20
+      start_period: 5s
+    environment:
+      NEO4J_dbms_memory_pagecache_size: 1G
+      NEO4J_dbms_memory_heap_initial__size: 5G
+      NEO4J_dbms_memory_heap_max__size: 5G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+      NEO4J_AUTH: 'neo4j/aas-connect'
+      NEO4J_PLUGINS: '["apoc"]'
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+
+  ### BaSyx AAS WebUI ###
+  web-ui:
+    image: eclipsebasyx/aas-gui:v2-240617
+    container_name: aas-web-ui
+    depends_on:
+      - aas-connect
+    hostname: aas-web-ui
+    environment:
+      AAS_REGISTRY_PATH: /api/v1/shell-descriptors
+      SUBMODEL_REGISTRY_PATH: /api/v1/submodel-descriptors
+      AAS_REPO_PATH: /api/v1/shells
+      SUBMODEL_REPO_PATH: /api/v1/submodels
+      BASE_PATH: /gui
+    restart: unless-stopped
+    volumes:
+      - ./basyx/logo:/usr/src/app/dist/Logo
+      # This patched file fixes https://github.com/eclipse-basyx/basyx-applications/issues/170 and should be removed,
+      # when the fix is deployed in the basyx docker image:
+      - ./basyx/index_patched.js:/usr/src/app/dist/assets/index-DbU_8ypS.js
+
