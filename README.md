@@ -22,10 +22,10 @@ The provided REST endpoints fully comply with the [AAS OpenAPI Specification](ht
 
 When the start-up completed, you will be able to access the following services in the browser:
 
-- http://localhost:4000/graphql: The **GraphQL endpoint** for the AAS Connect Backend Service.
-- http://localhost:4000/docs: The SwaggerUI listing and allowing access to all available **REST endpoints** for the AAS Connect Backend Service.
-- http://localhost:4000/gui - The integrated **[BaSyx Web UI](https://github.com/eclipse-basyx/basyx-applications/tree/main/aas-gui)** for managing AAS and AAS Submodel Data.
-- http://localhost:4000/: The integrated **GraphQL Frontend** instance. Use the credentials *aas/connect* to sign in (as defined in the `DEFAULT_USERNAME` and `DEFAULT_PASSWORD` variables in the `docker-compose.yml`). <br/>The frontend will only be functional if a valid GraphQL Frontend **License Key** is provided in the `.env` file.
+- http://localhost:4000/graphql/: The **GraphQL endpoint** for the AAS Connect Backend Service.
+- http://localhost:4000/docs/: The SwaggerUI listing and allowing access to all available **REST endpoints** for the AAS Connect Backend Service.
+- http://localhost:4000/gui/ - The integrated **[BaSyx Web UI](https://github.com/eclipse-basyx/basyx-applications/tree/main/aas-gui)** for managing AAS and AAS Submodel Data.
+- http://localhost:4000/: The integrated **[GraphQL Frontend](https://github.com/foprs/graphqlfrontend-stack)** instance. Use the credentials *aas/connect* to sign in (as defined in the `DEFAULT_USERNAME` and `DEFAULT_PASSWORD` variables in the `docker-compose.yml`). <br/>The frontend will only be functional if a valid GraphQL Frontend **License Key** is provided in the `.env` file.
 
 To stop the services, run the following command in the repository root directory:
 
@@ -35,7 +35,7 @@ docker compose down
 
 All persistent data is stored outside the container in the `neo4j/data` and the `neo4j/logs` directory. 
 
-## First Steps
+## Next Steps
 
 For submitting your first **Asset Administration Shell (AAS)** you follow this procedure (which might be automatized by your client application):
 
